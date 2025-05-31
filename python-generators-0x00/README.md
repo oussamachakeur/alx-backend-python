@@ -1,4 +1,6 @@
 
+
+
 # Python Generators - Project 0x00
 
 This project demonstrates advanced usage of **Python generators** to process large datasets efficiently, integrate with SQL databases, and simulate real-world streaming scenarios.
