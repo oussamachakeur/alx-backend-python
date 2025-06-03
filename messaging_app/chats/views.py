@@ -1,15 +1,18 @@
 from rest_framework import viewsets, permissions, status, filters
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
-from .permissions import IsOwnerOrReadOnly ,IsParticipantOfConversation
+from .permissions import IsOwnerOrReadOnly, IsParticipantOfConversation
+from .filters import MessageFilter
 from rest_framework.permissions import IsAuthenticated
+
 
 class ConversationViewSet(viewsets.ModelViewSet):
     """List and create conversations"""
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         conversation = serializer.save()
@@ -18,22 +21,17 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
 
 class MessageViewSet(viewsets.ModelViewSet):
-    """List and send messages"""
+    """List, send, and filter messages"""
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
-    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['conversation__conversation_id']  
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_class = MessageFilter
+    search_fields = ['conversation__conversation_id']
+
+    def get_queryset(self):
+        # Only show messages from conversations the user participates in
+        return Message.objects.filter(conversation__participants=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(sender=self.request.user)
-
-
-class MessageViewSet(viewsets.ModelViewSet):
-    queryset = Message.objects.all()
-    serializer_class = MessageSerializer
-    permission_classes = [IsParticipantOfConversation]
-
-    def get_queryset(self):
-        # Ensure user can only see messages from conversations they participate in
-        return Message.objects.filter(conversation__participants=self.request.user)
