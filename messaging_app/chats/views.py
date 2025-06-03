@@ -12,7 +12,6 @@ class ConversationViewSet(viewsets.ModelViewSet):
     """List and create conversations"""
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
-    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         conversation = serializer.save()

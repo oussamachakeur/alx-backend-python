@@ -9,9 +9,8 @@ class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     password = models.CharField(max_length=128) 
-    # Remove the default 'id' field by setting user_id as primary_key
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
-    USERNAME_FIELD = 'username'  # Still using username for login
+    USERNAME_FIELD = 'username' 
 
     def __str__(self):
         return self.username

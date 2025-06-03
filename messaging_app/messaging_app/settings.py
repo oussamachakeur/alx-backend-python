@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -145,10 +146,16 @@ REST_FRAMEWORK = {
 
 }
 
-from datetime import timedelta
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
+}
+
+AUTH_USER_MODEL = 'chats.CustomUser'
+
+SIMPLE_JWT = {
+    'USER_ID_FIELD': 'user_id',  # Tells JWT to use user_id instead of id
+    'USER_ID_CLAIM': 'user_id',  # Ensures the token includes 'user_id'
 }
