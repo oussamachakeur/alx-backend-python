@@ -67,13 +67,16 @@ class OffensiveLanguageMiddleware:
     
     
     
-class RolePermissionMiddleware:
+class RolepermissionMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        user = request.user
-        if request.path.startswith('/chat') and user.is_authenticated:
-            if not user.is_superuser and not user.groups.filter(name__in=['moderator']).exists():
+        # Skip if user is not authenticated
+        if request.user.is_authenticated:
+            user = request.user
+            # Assuming user role is stored in a field `role` on the user model
+            # You may need to modify this based on your actual model
+            if not hasattr(user, 'role') or user.role not in ['admin', 'moderator']:
                 return HttpResponseForbidden("You do not have permission to access this resource.")
         return self.get_response(request)
