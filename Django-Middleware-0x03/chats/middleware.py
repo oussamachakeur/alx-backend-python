@@ -72,7 +72,6 @@ class RolepermissionMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        # Skip if user is not authenticated
         if request.user.is_authenticated:
             user = request.user
             # Assuming user role is stored in a field `role` on the user model
