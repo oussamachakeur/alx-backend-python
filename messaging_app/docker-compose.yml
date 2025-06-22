@@ -14,7 +14,7 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - db_data:/var/lib/mysql
+      - db_data:/var/lib/mysql  # ✅ Persist MySQL data here
 
   web:
     build: .
@@ -29,4 +29,4 @@ services:
       - db
 
 volumes:
-  db_data:
+  db_data:  # ✅ Named volume declared
