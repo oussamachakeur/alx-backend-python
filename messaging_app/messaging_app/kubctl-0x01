@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Script to scale Django app in Kubernetes, load test it, and monitor resource usage
+
+echo "📦 Scaling Django app to 3 replicas..."
+kubectl scale deployment django-messaging-app --replicas=3
+
+echo "⏳ Waiting for pods to be ready..."
+sleep 10
+
+echo "🔍 Verifying running pods..."
+kubectl get pods -l app=django-messaging
+
+echo "🧪 Performing load testing with wrk..."
+
+# Get ClusterIP (internal) — not accessible from host directly, use port-forward
+POD_NAME=$(kubectl get pods -l app=django-messaging -o jsonpath="{.items[0].metadata.name}")
+
+# Port-forward to make it testable locally
+kubectl port-forward "$POD_NAME" 8000:8000 &
+PORT_FORWARD_PID=$!
+sleep 5
+
+# Run wrk test for 10 seconds with 10 threads and 100 connections
+wrk -t10 -c100 -d10s http://127.0.0.1:8000/
+
+# Kill the port-forward process
+kill $PORT_FORWARD_PID
+
+echo "📊 Monitoring resource usage..."
+kubectl top pods
+
+echo "✅ Scaling, load testing, and monitoring completed."
