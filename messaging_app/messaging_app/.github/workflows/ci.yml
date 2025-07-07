@@ -1,0 +1,60 @@
+name: Django CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_DATABASE: testdb
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.9
+
+    - name: Install dependencies
+      run: |
+        cd messaging_app
+        pip install -r requirements.txt
+
+    - name: Run Tests
+      run: |
+        cd messaging_app
+        pytest
+    - name: Lint with flake8
+      run: |
+        cd messaging_app
+        pip install flake8
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+    - name: Run Coverage
+      run: |
+        cd messaging_app
+        pip install coverage
+        coverage run -m pytest
+        coverage xml
+        coverage report
+
+    - name: Upload Coverage Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
+        path: messaging_app/coverage.xml
