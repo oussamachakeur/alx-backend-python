@@ -1,0 +1,18 @@
+        stage('Build Docker Image') {
+            steps {
+                dir('messaging_app') {
+                    sh 'docker build -t your-dockerhub-username/messaging_app .'
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds-id', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+                    sh '''
+                        echo $PASS | docker login -u $USER --password-stdin
+                        docker push your-dockerhub-username/messaging_app
+                    '''
+                }
+            }
+        }
